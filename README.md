@@ -1,53 +1,53 @@
 # Hotel Reservation System
 
-Spring Boot ile geliştirilen otel rezervasyon sistemi. Nesne yönelimli tasarım
-prensipleri (encapsulation, polimorfizm, SOLID) üzerine kurulu katmanlı bir mimari
-hedefleniyor.
+A hotel reservation system built with Spring Boot. The goal is a layered
+architecture grounded in object-oriented design principles (encapsulation,
+polymorphism, SOLID).
 
-## Teknolojiler
+## Tech Stack
 
-| Katman | Teknoloji |
+| Layer | Technology |
 |---|---|
-| Dil | Java 26 |
+| Language | Java 26 |
 | Framework | Spring Boot 4.1.0 |
-| Veri erişimi | Spring Data JPA / Hibernate |
-| Veritabanı | H2 (geliştirme), PostgreSQL (planlanan) |
-| Build | Maven (wrapper dahil) |
+| Data access | Spring Data JPA / Hibernate |
+| Database | H2 (development), PostgreSQL (planned) |
+| Build | Maven (wrapper included) |
 
-## Çalıştırma
+## Running
 
-Maven kurulumuna gerek yok, wrapper projeyle birlikte geliyor:
+No Maven installation required, the wrapper ships with the project:
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-- Uygulama: http://localhost:8080
-- H2 konsolu: http://localhost:8080/h2-console
+- Application: http://localhost:8080
+- H2 console: http://localhost:8080/h2-console
 
-## Planlanan Paket Yapısı
+## Planned Package Structure
 
 ```
 com.hotelres
 ├── domain/
 │   ├── model/       Room, Guest, Reservation, BaseEntity
 │   ├── enums/       RoomType, ReservationStatus
-│   └── pricing/     PricingRule ve stratejileri
-├── repository/      Spring Data JPA arayüzleri
-├── service/         iş mantığı
-├── controller/      REST uçları
-├── dto/             istek/yanıt modelleri
-├── mapper/          entity <-> dto dönüşümü
-└── exception/       özel hatalar ve global handler
+│   └── pricing/     PricingRule and its strategies
+├── repository/      Spring Data JPA interfaces
+├── service/         business logic
+├── controller/      REST endpoints
+├── dto/             request/response models
+├── mapper/          entity <-> dto mapping
+└── exception/       custom exceptions and global handler
 ```
 
-## Yol Haritası
+## Roadmap
 
-- [x] Proje iskeleti
-- [ ] Domain modeli (Room, Guest, Reservation)
-- [ ] Rezervasyon servisi ve tarih çakışma kontrolü
-- [ ] Fiyatlandırma stratejileri (sezon, hafta sonu, uzun konaklama)
-- [ ] REST API ve DTO katmanı
+- [x] Project skeleton
+- [ ] Domain model (Room, Guest, Reservation)
+- [ ] Reservation service and date overlap checks
+- [ ] Pricing strategies (seasonal, weekend, long stay)
+- [ ] REST API and DTO layer
 - [ ] Global exception handling
-- [ ] Birim testleri
-- [ ] PostgreSQL'e geçiş
+- [ ] Unit tests
+- [ ] Migration to PostgreSQL
