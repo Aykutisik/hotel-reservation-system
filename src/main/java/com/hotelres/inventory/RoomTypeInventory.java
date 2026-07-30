@@ -9,6 +9,9 @@ import jakarta.persistence.Version;
 @Table(name = "room_type_inventory")
 public class RoomTypeInventory {
 
+    private static final int OVERBOOKING_NUMERATOR = 11;
+    private static final int OVERBOOKING_DENOMINATOR = 10;
+
     @EmbeddedId
     private RoomTypeInventoryId id;
 
@@ -29,6 +32,25 @@ public class RoomTypeInventory {
     }
 
     // TODO (madde 8): reserve(int rooms) / release(int rooms)
+
+    public void reserve(int rooms) {
+        if (rooms <= 0) {
+            throw new IllegalArgumentException("Rooms must be greater than zero");
+        }
+
+        int capacity = totalInventory * OVERBOOKING_NUMERATOR / OVERBOOKING_DENOMINATOR;
+        if ((capacity - this.totalReserved) < rooms) {
+            throw new NoInventoryException("Overbookable rooms exceeded");
+        }
+        this.totalReserved += rooms;
+    }
+
+    public void release(int rooms) {
+        if (rooms <= 0 || this.totalReserved < rooms) {
+            throw new IllegalArgumentException("Rooms must be greater than zero");
+        }
+        this.totalReserved -= rooms;
+    }
 
     public RoomTypeInventoryId getId() {
         return id;
