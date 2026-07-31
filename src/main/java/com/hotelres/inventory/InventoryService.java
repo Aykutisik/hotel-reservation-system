@@ -4,6 +4,8 @@ package com.hotelres.inventory;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 @Service
 public class InventoryService {
 
@@ -15,9 +17,8 @@ public class InventoryService {
 
 
     @Transactional
-    public void reserve(RoomTypeInventory roomTypeInventory) {
-        roomTypeInventory
-        inventoryRepository.save(roomTypeInventory);
+    public void reserve(LocalDate checkInDate, LocalDate checkOutDate, Long hotelId, Long roomTypeInventory) {
+        inventoryRepository.isRoomAvailable(checkInDate, checkOutDate, hotelId, roomTypeInventory);
     }
 
 }
