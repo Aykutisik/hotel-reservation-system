@@ -1,10 +1,11 @@
 package com.hotelres.inventory;
 
 
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class InventoryService {
@@ -17,8 +18,13 @@ public class InventoryService {
 
 
     @Transactional
-    public void reserve(LocalDate checkInDate, LocalDate checkOutDate, Long hotelId, Long roomTypeInventory) {
-        inventoryRepository.isRoomAvailable(checkInDate, checkOutDate, hotelId, roomTypeInventory);
+    public void reserve(LocalDate checkInDate, LocalDate checkOutDate, Long hotelId, Long roomTypeId, Integer reservationQuantity) {
+        List<RoomTypeInventory> nights = inventoryRepository.findNights(hotelId, roomTypeId, checkInDate, checkOutDate);
+        for (RoomTypeInventory night : nights) {
+            night.reserve(reservationQuantity);
+            inventoryRepository.save(night);
+        }
+
     }
 
 }

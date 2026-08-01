@@ -14,7 +14,6 @@ public class RoomTypeInventoryId implements Serializable {
 
     private Long roomTypeId;
 
-    @Column(name = "inventory_date")
     private LocalDate inventoryDate;
 
     protected RoomTypeInventoryId() {
