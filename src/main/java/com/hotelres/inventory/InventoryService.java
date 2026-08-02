@@ -1,6 +1,8 @@
 package com.hotelres.inventory;
 
 
+import com.hotelres.reservation.Reservation;
+import com.hotelres.reservation.ReservationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,8 +14,11 @@ public class InventoryService {
 
     private final InventoryRepository inventoryRepository;
 
-    public InventoryService(InventoryRepository inventoryRepository) {
+    private final ReservationRepository reservationRepository;
+
+    public InventoryService(InventoryRepository inventoryRepository, ReservationRepository reservationRepository) {
         this.inventoryRepository = inventoryRepository;
+        this.reservationRepository = reservationRepository;
     }
 
 
@@ -24,6 +29,7 @@ public class InventoryService {
             night.reserve(reservationQuantity);
             inventoryRepository.save(night);
         }
+        reservationRepository.save(Reservation)
 
     }
 

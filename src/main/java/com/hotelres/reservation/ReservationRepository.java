@@ -2,5 +2,6 @@ package com.hotelres.reservation;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-interface ReservationRepository extends JpaRepository<Reservation, Integer> {
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+
 }

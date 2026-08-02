@@ -5,11 +5,13 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
+import lombok.Getter;
 
 import java.time.LocalDate;
 
 
 @Entity
+@Getter
 @Table(name = "reservation")
 public class Reservation {
     @Id
