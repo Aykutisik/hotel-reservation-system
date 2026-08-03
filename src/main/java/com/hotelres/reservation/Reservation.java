@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @Table(name = "reservation")
 public class Reservation {
     @Id
-    private Long reservationId;
+    private String reservationId;
     private Long hotelId;
     private Long roomTypeId;
     private LocalDate startDate;
@@ -26,6 +26,19 @@ public class Reservation {
     private int roomCount;
 
     protected Reservation() {
+    }
+
+    public static Reservation of(String id, Long hotelId, Long roomTypeId, LocalDate startDate, LocalDate endDate, Long guestId, int roomCount) {
+        Reservation reservation = new Reservation();
+        reservation.reservationId = id;
+        reservation.hotelId = hotelId;
+        reservation.roomTypeId = roomTypeId;
+        reservation.startDate = startDate;
+        reservation.endDate = endDate;
+        reservation.status = Status.PENDING;
+        reservation.guestId = guestId;
+        reservation.roomCount = roomCount;
+        return reservation;
     }
 
 }
