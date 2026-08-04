@@ -3,10 +3,11 @@ package com.hotelres.reservation;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 
@@ -14,31 +15,37 @@ import java.time.LocalDate;
 @Getter
 @Table(name = "reservation")
 public class Reservation {
+
     @Id
     private String reservationId;
+
     private Long hotelId;
     private Long roomTypeId;
     private LocalDate startDate;
     private LocalDate endDate;
+
     @Enumerated(EnumType.STRING)
     private Status status;
+
     private Long guestId;
     private int roomCount;
+
+    private Instant createdAt;
 
     protected Reservation() {
     }
 
-    public static Reservation of(String id, Long hotelId, Long roomTypeId, LocalDate startDate, LocalDate endDate, Long guestId, int roomCount) {
+    public static Reservation of(ReservationCommand cmd) {
         Reservation reservation = new Reservation();
-        reservation.reservationId = id;
-        reservation.hotelId = hotelId;
-        reservation.roomTypeId = roomTypeId;
-        reservation.startDate = startDate;
-        reservation.endDate = endDate;
+        reservation.reservationId = cmd.reservationId();
+        reservation.hotelId = cmd.hotelId();
+        reservation.roomTypeId = cmd.roomTypeId();
+        reservation.startDate = cmd.startDate();
+        reservation.endDate = cmd.endDate();
+        reservation.guestId = cmd.guestId();
+        reservation.roomCount = cmd.roomCount();
         reservation.status = Status.PENDING;
-        reservation.guestId = guestId;
-        reservation.roomCount = roomCount;
+        reservation.createdAt = Instant.now();
         return reservation;
     }
-
 }

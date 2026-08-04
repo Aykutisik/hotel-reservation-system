@@ -9,20 +9,22 @@ public record ReservationCommand(
         Long roomTypeId,
         LocalDate startDate,
         LocalDate endDate,
-        LocalDate createdAt,
         Long guestId,
         int roomCount
 ) {
 
     public ReservationCommand {
-        if (startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException("End date should be before start date");
+        if (!startDate.isBefore(endDate)) {
+            throw new IllegalArgumentException("startDate must be before endDate");
         }
         if (roomCount < 1) {
-            throw new IllegalArgumentException("Room count should be greater than 0");
+            throw new IllegalArgumentException("roomCount must be greater than zero");
         }
     }
 
+    /**
+     * Konaklanan gece sayisi. Cikis gunu gece sayilmaz: [startDate, endDate)
+     */
     public int nights() {
         return (int) ChronoUnit.DAYS.between(startDate, endDate);
     }
