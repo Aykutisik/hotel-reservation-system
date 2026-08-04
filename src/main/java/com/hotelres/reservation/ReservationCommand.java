@@ -9,6 +9,7 @@ public record ReservationCommand(
         Long roomTypeId,
         LocalDate startDate,
         LocalDate endDate,
+        LocalDate createdAt,
         Long guestId,
         int roomCount
 ) {
