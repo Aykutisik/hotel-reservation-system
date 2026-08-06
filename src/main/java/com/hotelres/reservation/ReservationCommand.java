@@ -22,9 +22,7 @@ public record ReservationCommand(
         }
     }
 
-    /**
-     * Konaklanan gece sayisi. Cikis gunu gece sayilmaz: [startDate, endDate)
-     */
+
     public int nights() {
         return (int) ChronoUnit.DAYS.between(startDate, endDate);
     }

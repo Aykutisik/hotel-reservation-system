@@ -2,14 +2,13 @@ package com.hotelres.inventory;
 
 
 import com.hotelres.reservation.Reservation;
+import com.hotelres.reservation.ReservationCommand;
 import com.hotelres.reservation.ReservationRepository;
-import com.hotelres.reservation.Status;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
+import java.util.Objects;
 
 @Service
 public class InventoryService {
@@ -25,23 +24,37 @@ public class InventoryService {
 
 
     @Transactional
-    public void reserve(LocalDate checkInDate, LocalDate checkOutDate, Long hotelId, Long roomTypeId, Integer reservationQuantity, Long guestId) {
-        List<RoomTypeInventory> nights = inventoryRepository.findNights(hotelId, roomTypeId, checkInDate, checkOutDate.minusDays(1));
+    public Reservation reserve(ReservationCommand cmd) {
+
+        List<RoomTypeInventory> nights = inventoryRepository.findNights(
+                cmd.hotelId(), cmd.roomTypeId(), cmd.startDate(), cmd.endDate().minusDays(1));
+        if (cmd.nights() != nights.size()) {
+            throw new NoInventoryException("Envanter satiri eksik: " + nights.size() + "/" + cmd.nights());
+        }
         for (RoomTypeInventory night : nights) {
-            night.reserve(reservationQuantity);
+            night.reserve(cmd.roomCount());
             inventoryRepository.save(night);
         }
-        Reservation reservation = Reservation.of(UUID.randomUUID().toString(), hotelId, roomTypeId, checkInDate, checkOutDate, guestId, reservationQuantity);
-        reservationRepository.save(reservation);
+        return reservationRepository.save(Reservation.of(cmd));
     }
 
-    public void release(String reservationId, Long guestId) {
-        Reservation reservation = reservationRepository.findById(reservationId).orElse(null);
-        if (reservation != null) {
-            reservationRepository.delete(reservation);
-            List<RoomTypeInventory> nights = inventoryRepository.findNights(reservation.getHotelId(),
-                    reservation.getRoomTypeId(), reservation.getStartDate(), reservation.getEndDate());
 
+    @Transactional
+    public void release(String reservationId, Long guestId) {
+
+        Reservation reservation = reservationRepository.findById(reservationId).
+                orElseThrow(() -> new IllegalStateException("Reservation id " + reservationId + " not found"));
+
+        if(!Objects.equals(reservation.getGuestId(), guestId)) {
+            throw new IllegalStateException("The reservation is not belonged by Guest id " + guestId);
+        }
+        reservation.cancel();
+        reservationRepository.save(reservation);
+        List<RoomTypeInventory> nights = inventoryRepository.findNights(reservation.getHotelId(),
+                reservation.getRoomTypeId(), reservation.getStartDate(), reservation.getEndDate().minusDays(1));
+        for (RoomTypeInventory night : nights) {
+            night.release(reservation.getRoomCount());
+            inventoryRepository.save(night);
         }
 
     }

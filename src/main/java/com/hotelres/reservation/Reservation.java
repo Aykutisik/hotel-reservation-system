@@ -5,17 +5,18 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.Getter;
 
 import java.time.Instant;
 import java.time.LocalDate;
 
 
 @Entity
-@Getter
 @Table(name = "reservation")
 public class Reservation {
 
+    /**
+     * Idempotency key -- istemci uretir, sunucu asla uretmez.
+     */
     @Id
     private String reservationId;
 
@@ -29,6 +30,7 @@ public class Reservation {
 
     private Long guestId;
     private int roomCount;
+
 
     private Instant createdAt;
 
@@ -47,5 +49,48 @@ public class Reservation {
         reservation.status = Status.PENDING;
         reservation.createdAt = Instant.now();
         return reservation;
+    }
+
+    public void cancel() {
+        if (status == Status.CANCELED) {
+            throw new IllegalArgumentException("Reservation already cancelled");
+        }
+        status = Status.CANCELED;
+    }
+
+    public String getReservationId() {
+        return reservationId;
+    }
+
+    public Long getHotelId() {
+        return hotelId;
+    }
+
+    public Long getRoomTypeId() {
+        return roomTypeId;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public Long getGuestId() {
+        return guestId;
+    }
+
+    public int getRoomCount() {
+        return roomCount;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 }
