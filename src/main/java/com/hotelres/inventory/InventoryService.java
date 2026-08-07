@@ -1,63 +1,52 @@
 package com.hotelres.inventory;
 
 
-import com.hotelres.reservation.Reservation;
-import com.hotelres.reservation.ReservationCommand;
-import com.hotelres.reservation.ReservationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Objects;
 
+/**
+ * Sadece envanter sayaclarini yonetir. Rezervasyon kavramindan habersizdir --
+ * kim, neden rezerve etti bilmez; yalnizca "su gecelerde su kadar oda" der.
+ */
 @Service
 public class InventoryService {
 
     private final InventoryRepository inventoryRepository;
 
-    private final ReservationRepository reservationRepository;
-
-    public InventoryService(InventoryRepository inventoryRepository, ReservationRepository reservationRepository) {
+    public InventoryService(InventoryRepository inventoryRepository) {
         this.inventoryRepository = inventoryRepository;
-        this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
+    public void reserve(Long hotelId, Long roomTypeId, LocalDate checkIn, LocalDate checkOut, int rooms) {
+        for (RoomTypeInventory night : nights(hotelId, roomTypeId, checkIn, checkOut)) {
+            night.reserve(rooms);
+        }
+    }
 
     @Transactional
-    public Reservation reserve(ReservationCommand cmd) {
+    public void release(Long hotelId, Long roomTypeId, LocalDate checkIn, LocalDate checkOut, int rooms) {
+        for (RoomTypeInventory night : nights(hotelId, roomTypeId, checkIn, checkOut)) {
+            night.release(rooms);
+        }
+    }
 
+    /**
+     * Aralikatki her gece icin envanter satirini getirir. Aralik [checkIn, checkOut):
+     * cikis gunu gece sayilmaz, o yuzden sorguya checkOut - 1 gecilir.
+     */
+    private List<RoomTypeInventory> nights(Long hotelId, Long roomTypeId, LocalDate checkIn, LocalDate checkOut) {
         List<RoomTypeInventory> nights = inventoryRepository.findNights(
-                cmd.hotelId(), cmd.roomTypeId(), cmd.startDate(), cmd.endDate().minusDays(1));
-        if (cmd.nights() != nights.size()) {
-            throw new NoInventoryException("Envanter satiri eksik: " + nights.size() + "/" + cmd.nights());
+                hotelId, roomTypeId, checkIn, checkOut.minusDays(1));
+
+        long expected = ChronoUnit.DAYS.between(checkIn, checkOut);
+        if (nights.size() != expected) {
+            throw new NoInventoryException("Envanter satiri eksik: " + nights.size() + "/" + expected);
         }
-        for (RoomTypeInventory night : nights) {
-            night.reserve(cmd.roomCount());
-            inventoryRepository.save(night);
-        }
-        return reservationRepository.save(Reservation.of(cmd));
+        return nights;
     }
-
-
-    @Transactional
-    public void release(String reservationId, Long guestId) {
-
-        Reservation reservation = reservationRepository.findById(reservationId).
-                orElseThrow(() -> new IllegalStateException("Reservation id " + reservationId + " not found"));
-
-        if(!Objects.equals(reservation.getGuestId(), guestId)) {
-            throw new IllegalStateException("The reservation is not belonged by Guest id " + guestId);
-        }
-        reservation.cancel();
-        reservationRepository.save(reservation);
-        List<RoomTypeInventory> nights = inventoryRepository.findNights(reservation.getHotelId(),
-                reservation.getRoomTypeId(), reservation.getStartDate(), reservation.getEndDate().minusDays(1));
-        for (RoomTypeInventory night : nights) {
-            night.release(reservation.getRoomCount());
-            inventoryRepository.save(night);
-        }
-
-    }
-
-
 }
